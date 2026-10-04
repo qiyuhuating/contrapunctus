@@ -1,0 +1,26 @@
+{
+  "name": "contrapunctus",
+  "version": "0.1.0",
+  "description": "A Fugue-tree CRDT collaborative text engine: divergent voices, one converging text. Zero runtime dependencies.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "fuzz": "vitest run --config vitest.fuzz.config.ts",
+    "coverage": "vitest run --coverage",
+    "bench": "vitest bench --run",
+    "demo": "npm run build && node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "typescript": "^5.6.0",
+    "vitest": "^3.2.4"
+  }
+}

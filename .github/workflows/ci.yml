@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and property tests
+        run: npm test
+
+      - name: Chaos fuzz suites
+        run: npm run fuzz
+
+      - name: Build
+        run: npm run build
+
+  deploy-pages:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Assemble Pages site
+        shell: bash
+        run: |
+          mkdir -p site/demo site/src
+          cp demo/index.html site/
+          # Static demo assets (style.css, images) referenced via relative urls from index.html
+          find demo -maxdepth 1 -type f ! -name '*.ts' ! -name 'index.html' -exec cp {} site/ \;
+          cp -r dist/demo/. site/demo/
+          cp -r dist/src/. site/src/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

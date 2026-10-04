@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>contrapunctus — a Fugue CRDT lab</title>
+    <meta
+      name="description"
+      content="Interactive lab for a Fugue Max Tree CRDT: three voices type concurrently through a chaotic network and converge on one text."
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>contrapunctus</h1>
+        <p class="tagline">Voices diverge. Text converges. — a Fugue Max Tree CRDT lab</p>
+      </div>
+      <span id="engine-badge" class="badge offline">engine: ?</span>
+    </header>
+
+    <main>
+      <section id="replicas" class="panel">
+        <h2>replicas</h2>
+        <div class="replica-grid">
+          <div class="replica" data-replica="alice" style="--accent: #22d3ee">
+            <h3>alice <span class="vv" id="vv-alice"></span></h3>
+            <div id="pane-alice" class="pane" contenteditable="true" spellcheck="false"></div>
+          </div>
+          <div class="replica" data-replica="bob" style="--accent: #f472b6">
+            <h3>bob <span class="vv" id="vv-bob"></span></h3>
+            <div id="pane-bob" class="pane" contenteditable="true" spellcheck="false"></div>
+          </div>
+          <div class="replica" data-replica="carol" style="--accent: #fbbf24">
+            <h3>carol <span class="vv" id="vv-carol"></span></h3>
+            <div id="pane-carol" class="pane" contenteditable="true" spellcheck="false"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="flow-panel" class="panel">
+        <h2>op flow</h2>
+        <canvas id="flow" width="900" height="280"></canvas>
+      </section>
+
+      <section id="tree-panel" class="panel">
+        <h2>
+          fugue tree
+          <select id="tree-replica">
+            <option value="alice">alice</option>
+            <option value="bob">bob</option>
+            <option value="carol">carol</option>
+          </select>
+        </h2>
+        <div id="tree" class="tree"><span class="dim">core loading…</span></div>
+        <p id="tree-hint" class="dim small">tombstones are dimmed · click a leaf to inspect</p>
+      </section>
+
+      <section id="meter-panel" class="panel">
+        <h2>convergence</h2>
+        <div id="meter" class="meter syncing">SYNCING</div>
+        <div id="meter-detail" class="dim small"></div>
+        <div id="clock" class="dim small"></div>
+      </section>
+
+      <section id="net-panel" class="panel">
+        <h2>network console</h2>
+        <div class="controls">
+          <label>latency <input id="latency" type="range" min="0" max="300" value="60" /> <output id="latency-v">60ms</output></label>
+          <label>jitter <input id="jitter" type="range" min="0" max="150" value="30" /> <output id="jitter-v">30ms</output></label>
+          <label>drop <input id="drop" type="range" min="0" max="50" value="0" /> <output id="drop-v">0%</output></label>
+          <label>dup <input id="dup" type="range" min="0" max="50" value="0" /> <output id="dup-v">0%</output></label>
+          <label class="check"><input id="reorder" type="checkbox" checked /> reorder</label>
+        </div>
+        <div class="row">
+          <button id="partition">partition alice+bob | carol</button>
+          <button id="heal">heal</button>
+          <span id="stats" class="dim small"></span>
+        </div>
+        <p class="dim small">ops dropped while partitioned are lost forever — replay sync is on the roadmap (v0.5)</p>
+      </section>
+
+      <section id="scenario-panel" class="panel">
+        <h2>scenarios</h2>
+        <div class="row wrap">
+          <button id="sc-race">concurrent race</button>
+          <button id="sc-partition">partition &amp; heal</button>
+          <button id="sc-emoji">emoji storm</button>
+          <button id="sc-reset">reset</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="dim small">
+      every keystroke becomes a Fugue Max Tree node travelling a lossy network · zero runtime dependencies
+    </footer>
+
+    <script type="module" src="./demo/main.js"></script>
+  </body>
+</html>
