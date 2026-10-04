@@ -8,91 +8,120 @@
       name="description"
       content="Interactive lab for a Fugue Max Tree CRDT: three voices type concurrently through a chaotic network and converge on one text."
     />
+    <meta name="theme-color" content="#05080f" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2305080f'/%3E%3Ccircle cx='10' cy='21' r='3.4' fill='%2338e1ff'/%3E%3Ccircle cx='16' cy='11' r='3.4' fill='%23ff6bd6'/%3E%3Ccircle cx='22' cy='21' r='3.4' fill='%23ffc94d'/%3E%3C/svg%3E"
+    />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <header>
-      <div>
+    <div class="backdrop" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <div class="masthead-title">
         <h1>contrapunctus</h1>
-        <p class="tagline">Voices diverge. Text converges. — a Fugue Max Tree CRDT lab</p>
+        <p class="tagline">Voices diverge. Text converges. <span class="dim">— a Fugue Max Tree CRDT lab</span></p>
       </div>
-      <span id="engine-badge" class="badge offline">engine: ?</span>
+      <div class="masthead-badges">
+        <span class="badge version">v0.1.0</span>
+        <span id="engine-badge" class="badge offline">engine: ?</span>
+      </div>
     </header>
 
     <main>
-      <section id="replicas" class="panel">
-        <h2>replicas</h2>
+      <section id="replicas" class="panel span-all">
+        <h2><i class="mark cyan"></i>replicas <span class="hint">— type in any pane, watch it merge everywhere</span></h2>
         <div class="replica-grid">
-          <div class="replica" data-replica="alice" style="--accent: #22d3ee">
-            <h3>alice <span class="vv" id="vv-alice"></span></h3>
-            <div id="pane-alice" class="pane" contenteditable="true" spellcheck="false"></div>
+          <div class="replica" data-replica="alice" style="--accent: #38e1ff">
+            <div class="replica-head">
+              <span class="rdot"></span>
+              <h3>alice</h3>
+              <span class="vv" id="vv-alice"></span>
+            </div>
+            <div id="pane-alice" class="pane" contenteditable="true" spellcheck="false" data-placeholder="type here…"></div>
           </div>
-          <div class="replica" data-replica="bob" style="--accent: #f472b6">
-            <h3>bob <span class="vv" id="vv-bob"></span></h3>
-            <div id="pane-bob" class="pane" contenteditable="true" spellcheck="false"></div>
+          <div class="replica" data-replica="bob" style="--accent: #ff6bd6">
+            <div class="replica-head">
+              <span class="rdot"></span>
+              <h3>bob</h3>
+              <span class="vv" id="vv-bob"></span>
+            </div>
+            <div id="pane-bob" class="pane" contenteditable="true" spellcheck="false" data-placeholder="type here…"></div>
           </div>
-          <div class="replica" data-replica="carol" style="--accent: #fbbf24">
-            <h3>carol <span class="vv" id="vv-carol"></span></h3>
-            <div id="pane-carol" class="pane" contenteditable="true" spellcheck="false"></div>
+          <div class="replica" data-replica="carol" style="--accent: #ffc94d">
+            <div class="replica-head">
+              <span class="rdot"></span>
+              <h3>carol</h3>
+              <span class="vv" id="vv-carol"></span>
+            </div>
+            <div id="pane-carol" class="pane" contenteditable="true" spellcheck="false" data-placeholder="type here…"></div>
           </div>
         </div>
       </section>
 
       <section id="flow-panel" class="panel">
-        <h2>op flow</h2>
-        <canvas id="flow" width="900" height="280"></canvas>
+        <h2><i class="mark cyan"></i>op flow <span class="hint">— every op rides the wire</span></h2>
+        <canvas id="flow" aria-label="animated map of operations travelling between replicas"></canvas>
       </section>
 
       <section id="tree-panel" class="panel">
         <h2>
-          fugue tree
-          <select id="tree-replica">
+          <i class="mark magenta"></i>fugue tree
+          <select id="tree-replica" aria-label="which replica's tree to show">
             <option value="alice">alice</option>
             <option value="bob">bob</option>
             <option value="carol">carol</option>
           </select>
         </h2>
-        <div id="tree" class="tree"><span class="dim">core loading…</span></div>
-        <p id="tree-hint" class="dim small">tombstones are dimmed · click a leaf to inspect</p>
+        <div id="tree" class="tree" role="figure" aria-label="live Fugue tree of one replica"><span class="dim">core loading…</span></div>
+        <p id="tree-meta" class="dim small">—</p>
+        <p id="tree-hint" class="dim small">tombstones dimmed · click a node to inspect</p>
       </section>
 
       <section id="meter-panel" class="panel">
-        <h2>convergence</h2>
-        <div id="meter" class="meter syncing">SYNCING</div>
+        <h2><i class="mark amber"></i>convergence</h2>
+        <div id="meter" class="meter syncing"><span class="pulse-dot"></span><span id="meter-text">SYNCING</span></div>
+        <div class="chips" id="replica-chips" aria-label="per-replica convergence"></div>
         <div id="meter-detail" class="dim small"></div>
-        <div id="clock" class="dim small"></div>
+        <div id="clock" class="dim small mono-num"></div>
       </section>
 
       <section id="net-panel" class="panel">
-        <h2>network console</h2>
+        <h2><i class="mark cyan"></i>network console</h2>
         <div class="controls">
-          <label>latency <input id="latency" type="range" min="0" max="300" value="60" /> <output id="latency-v">60ms</output></label>
-          <label>jitter <input id="jitter" type="range" min="0" max="150" value="30" /> <output id="jitter-v">30ms</output></label>
-          <label>drop <input id="drop" type="range" min="0" max="50" value="0" /> <output id="drop-v">0%</output></label>
-          <label>dup <input id="dup" type="range" min="0" max="50" value="0" /> <output id="dup-v">0%</output></label>
-          <label class="check"><input id="reorder" type="checkbox" checked /> reorder</label>
+          <label>latency <input id="latency" type="range" min="0" max="300" value="60" step="1" /> <output id="latency-v">60ms</output></label>
+          <label>jitter <input id="jitter" type="range" min="0" max="150" value="30" step="1" /> <output id="jitter-v">30ms</output></label>
+          <label>drop <input id="drop" type="range" min="0" max="50" value="0" step="1" /> <output id="drop-v">0%</output></label>
+          <label>dup <input id="dup" type="range" min="0" max="50" value="0" step="1" /> <output id="dup-v">0%</output></label>
+          <label class="check">reorder
+            <input id="reorder" type="checkbox" checked />
+            <span class="switch" aria-hidden="true"></span>
+          </label>
         </div>
         <div class="row">
-          <button id="partition">partition alice+bob | carol</button>
-          <button id="heal">heal</button>
-          <span id="stats" class="dim small"></span>
+          <button id="partition" class="btn-danger">partition</button>
+          <button id="heal" class="btn-ok">heal</button>
+          <span id="link-state" class="dim small">link state: fully connected</span>
         </div>
-        <p class="dim small">ops dropped while partitioned are lost forever — replay sync is on the roadmap (v0.5)</p>
+        <p id="stats" class="dim small mono-num"></p>
+        <p class="dim small">ops dropped on a downed link are lost forever — replay sync lands in v0.5</p>
       </section>
 
-      <section id="scenario-panel" class="panel">
-        <h2>scenarios</h2>
+      <section id="scenario-panel" class="panel span-all">
+        <h2><i class="mark amber"></i>scenarios</h2>
         <div class="row wrap">
           <button id="sc-race">concurrent race</button>
           <button id="sc-partition">partition &amp; heal</button>
           <button id="sc-emoji">emoji storm</button>
-          <button id="sc-reset">reset</button>
+          <button id="sc-reset" class="btn-danger">soft reset</button>
         </div>
       </section>
     </main>
 
     <footer class="dim small">
-      every keystroke becomes a Fugue Max Tree node travelling a lossy network · zero runtime dependencies
+      every keystroke becomes a Fugue Max Tree node on a lossy wire · zero runtime dependencies ·
+      <span class="mono-num">MIT</span> · <a href="https://github.com/qiyuhuating/contrapunctus" target="_blank" rel="noopener">source</a>
     </footer>
 
     <script type="module" src="./demo/main.js"></script>
